@@ -1,1 +1,1 @@
-CUDA_VISIBLE_DEVICES=0 python create_patches_fp.py --source /data_storage/Camelyon/CAMELYON16/training --save_dir ./patches/Camelyon16_patch256_ostu --patch_level 1 --patch_size 256 --step_size 256 --seg --patch --stitch --use_ostu
+CUDA_VISIBLE_DEVICES=0 python /kaggle/working/WSI-finetuning/create_patches_fp.py --source /kaggle/input/tcga-wsi-svs --save_dir /kaggle/working/vib_patches --patch_level 1 --patch_size 256 --step_size 256 --seg --patch --stitch --use_ostu

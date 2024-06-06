@@ -45,9 +45,10 @@ def main(args):
         seed_torch(args.seed+i)
         # pdb.set_trace()
         train_dataset, val_dataset, test_dataset = dataset.return_splits(from_id=False,
-                csv_path='{}/splits_{}.csv'.format(args.split_dir, i))
+                csv_path='/kaggle/working/WSI-finetuning/splits/task_camelyon16/splits_0.csv')
         # train_loader = get_split_loader(train_dataset)
         datasets = (train_dataset, val_dataset, test_dataset)
+        print("Len of train, val, and test dataset -->", len(train_dataset), len(val_dataset), len(test_dataset))
         results, test_auc, val_auc, test_acc, val_acc  = train(datasets, i, args)
         all_test_auc.append(test_auc)
         all_val_auc.append(val_auc)
@@ -80,10 +81,10 @@ parser.add_argument('--reg', type=float, default=1e-2,
                     help='weight decay (default: 1e-5)')
 parser.add_argument('--seed', type=int, default=1,
                     help='random seed for reproducible experiment (default: 1)')
-parser.add_argument('--k', type=int, default=5, help='number of folds (default: 10)')
+parser.add_argument('--k', type=int, default=1, help='number of folds (default: 10)')
 parser.add_argument('--k_start', type=int, default=-1, help='start fold (default: -1, last fold)')
-parser.add_argument('--k_end', type=int, default=5, help='end fold (default: -1, first fold)')
-parser.add_argument('--results_dir', default='./results', help='results directory (default: ./results)')
+parser.add_argument('--k_end', type=int, default=1, help='end fold (default: -1, first fold)')
+parser.add_argument('--results_dir', default='/kaggle/working/results', help='results directory (default: ./results)')
 parser.add_argument('--split_dir', type=str, default=None,
                     help='manually specify the set of splits to use, '
                     +'instead of infering from the task and label_frac argument (default: None)')
@@ -99,9 +100,9 @@ parser.add_argument('--model_type', type=str, choices=['clam_sb', 'clam_mb', 'mi
 parser.add_argument('--exp_code', type=str, help='experiment code for saving results')
 parser.add_argument('--weighted_sample', action='store_true', default=False, help='enable weighted sampling')
 parser.add_argument('--model_size', type=str, choices=['small', 'big'], default='small', help='size of model, does not affect mil')
-parser.add_argument('--task', type=str, choices=['task_1_tumor_vs_normal',  'task_2_tumor_subtyping'])
+parser.add_argument('--task', type=str, choices=['task_1_tumor_vs_normal'])
 ### CLAM specific options
-parser.add_argument('--no_inst_cluster', action='store_true', default=False,
+parser.add_argument('--no_inst_cluster', action='store_true', default=True,
                      help='disable instance-level clustering')
 parser.add_argument('--inst_loss', type=str, choices=['svm', 'ce', None], default=None,
                      help='instance-level clustering loss function (default: None)')
@@ -120,18 +121,17 @@ args.lr = 1e-4
 args.weighted_sample =True
 args.inst_loss ="svm"
 args.task = "task_1_tumor_vs_normal"
-args.split_dir = "task_camelyon16/"
-args.csv_path = './dataset_csv/camelyon16.csv'
-args.data_root_dir = "./data_feat"
-sub_feat_dir = 'Camelyon16_patch256_res50'
+args.split_dir = "/kaggle/working/WSI-finetuning/splits/task_camelyon16"
+args.csv_path = '/kaggle/working/WSI-finetuning/dataset_csv/camelyon16.csv'
+args.data_root_dir = "/kaggle/working/data_feat"
+sub_feat_dir = 'Camelyon16_patch256_ostu_res50'
 args.max_epochs = 50
 args.reg = 1e-04
 args.use_drop_out = True
 args.bag_weight = 0.7
 args.seed = 2021
-args.k = 5
-args.k_end = 5
-
+args.k = 1
+args.k_end = 1
 def seed_torch(seed=7):
     import random
     random.seed(seed)

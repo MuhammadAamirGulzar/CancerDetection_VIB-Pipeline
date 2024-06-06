@@ -54,9 +54,17 @@ def seg_and_patch(source, save_dir, patch_save_dir, mask_save_dir, stitch_save_d
 				  patch = False, auto_skip=True, process_list = None):
 	
 
+	# Initialize an empty list to store SVS file paths
+	slides = []
 
-	slides = sorted(os.listdir(source),reverse=True)
-	slides = [slide for slide in slides if os.path.isfile(os.path.join(source, slide))]
+	# Recursively traverse through all directories and subdirectories
+	for root, dirs, files in os.walk(source):
+		for file in files:
+			if file.endswith(".svs"):
+				slides.append(os.path.join(root, file))
+
+	# Now slides list contains the complete paths to all SVS files within the source directory and its subdirectories
+	print(slides)
 	if process_list is None:
 		df = initialize_df(slides, seg_params, filter_params, vis_params, patch_params)
 	
@@ -92,8 +100,8 @@ def seg_and_patch(source, save_dir, patch_save_dir, mask_save_dir, stitch_save_d
 		df.loc[idx, 'process'] = 0
 		slide_id, _ = os.path.splitext(slide)
 
-		if auto_skip and os.path.isfile(os.path.join(patch_save_dir, slide_id + '.h5')):
-			print('{} already exist in destination location, skipped'.format(slide_id))
+		if auto_skip and os.path.isfile(os.path.join(patch_save_dir, slide_id.split("/")[5] + '.h5')):
+			print('{} already exist in destination location, skipped'.format(slide_id.split("/")[5]))
 			df.loc[idx, 'status'] = 'already_exist'
 			continue
 
@@ -198,7 +206,9 @@ def seg_and_patch(source, save_dir, patch_save_dir, mask_save_dir, stitch_save_d
 
 		if save_mask:
 			mask = WSI_object.visWSI(**current_vis_params)
-			mask_path = os.path.join(mask_save_dir, slide_id+'.jpg')
+			print("Mask save -->", mask_save_dir)
+			print("Slide id -->", slide_id)
+			mask_path = os.path.join(mask_save_dir, slide_id.split("/")[5]+'.jpg')
 			mask.save(mask_path)
 
 		patch_time_elapsed = -1 # Default time
@@ -210,10 +220,10 @@ def seg_and_patch(source, save_dir, patch_save_dir, mask_save_dir, stitch_save_d
 		
 		stitch_time_elapsed = -1
 		if stitch:
-			file_path = os.path.join(patch_save_dir, slide_id+'.h5')
+			file_path = os.path.join(patch_save_dir, slide_id.split("/")[5]+'.h5')
 			if os.path.isfile(file_path):
 				heatmap, stitch_time_elapsed = stitching(file_path, WSI_object, downscale=64)
-				stitch_path = os.path.join(stitch_save_dir, slide_id+'.jpg')
+				stitch_path = os.path.join(stitch_save_dir, slide_id.split("/")[5]+'.jpg')
 				heatmap.save(stitch_path)
 
 		print("segmentation took {} seconds".format(seg_time_elapsed))
